@@ -1,64 +1,25 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+var { mongoose } = require('./db/mongoose.js');
+var { Todo } = require('./models/todo.js');
+var { User } = require('./models/user.js');
 
-// var Todo = mongoose.model('Todo', {
-//     text: {
-//         type: String,
-//         required: true,
-//         minlength: 1,
-//         trim: true
-//     },
-//     completed: {
-//         type: Boolean,
-//         required: true,
-//         default: false
-//     },
-//     completedAt: {
-//         type: Number,
-//         default: null
-//     }
-// });
+var app = express();
 
-// var newTodo = new Todo({
-//     text: 'Edit this video '
-// });
+app.use(bodyParser.json());
+app.post('/todos', (req, res) => {
+    var todo = new Todo({
+        text: req.body.text
+    });
 
-// newTodo.save()
-//     .then((doc) => {
-//         console.log('Saved Todo', doc);
-//     }, (e) => {
-//         console.error('unable ', e);
-//     });
-
-var User = mongoose.model('User', {
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 1
-    },
-    age: {
-        type: Number,
-        required: true
-    }
-});
-
-var newUser = new User({
-    name: 'Adedeji Ajiboye ',
-    email: 'ajibdeji@gmail.com',
-    age: 24
-});
-
-newUser.save()
-    .then((userRecord) => {
-        console.log(JSON.stringify(userRecord, undefined, 2));
+    todo.save().then((doc) => {
+        res.send(doc);
     }, (e) => {
+        res.status(400).send(e);
         console.error(e);
     });
+});
+app.listen(3000, () => {
+    console.log('Started on port 3000');
+});
