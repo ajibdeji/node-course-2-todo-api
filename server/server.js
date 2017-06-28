@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
+const jwt = require('jsonwebtoken');
 
 var { ObjectId } = require('mongodb');
 var { mongoose } = require('./db/mongoose.js');
@@ -92,6 +93,25 @@ app.patch('/todos/:id', (req, res) => {
         res.status(400).send();
     });
 });
+
+app.post('/users', (req, res) => {
+    var body = _.pick(req.body, ['name', 'email', 'age', 'password']);
+    var user = new User(body);
+    // console.log(user);
+    // res.send(user);
+    user.save().then(() => {
+            return user.generateAuthToken();
+            // res.send(user);
+        })
+        .then((token) => {
+            res.header('x-auth', token).send(user);
+        })
+        .catch((e) => {
+            res.status(400).send(e);
+            console.error(e);
+        });
+});
 app.listen(3000, () => {
     console.log('Started on port 3000');
+    // console.log(process.env);
 });
