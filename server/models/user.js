@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 var UserSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        // required: true,
         trim: true
     },
     email: {
@@ -23,11 +23,11 @@ var UserSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: true
+        // required: true
     },
     password: {
         type: String,
-        require: true,
+        required: true,
         minlength: 6
     },
     tokens: [{
@@ -56,7 +56,7 @@ UserSchema.methods.generateAuthToken = function() {
     var token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
 
     user.tokens.push({ access, token });
-    user.save()
+    return user.save()
         .then(() => {
             return token;
         });
@@ -114,6 +114,17 @@ UserSchema.pre('save', function(next) {
     }
 
 });
+
+UserSchema.methods.removeToken = function(token) {
+    var user = this;
+    return user.update({
+        $pull: {
+            tokens: {
+                token: { token }
+            }
+        }
+    });
+};
 var User = mongoose.model('User', UserSchema);
 module.exports = {
     User
